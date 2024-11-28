@@ -1,11 +1,11 @@
 # 157-modul-gpsr
-GPSR Herstellerinformationen für Zen Cart 1.5.7 deutsch
+GPSR manufacturer information for Zen Cart 1.5.7 German
 
-Dieses Modul erweitert die Administration der Hersteller mit neuen Eingabefeldern für die von der ab 13. Dezember 2024 geltende Produktsicherheitsverordnung (GPSR) vorgesehenen erweiterten Herstellerinformationen.
-Die dort hinterlegten Daten werden dann auf der Artikeldetailseite bei Artikeln des jeweiligen Herstellers angezeigt.
+This module extends the administration of manufacturers with new input fields for the extended manufacturer information provided for by the Product Safety Regulation (GPSR), which will come into force on December 13, 2024.
+The data stored there is then displayed on the article detail page for articles from the respective manufacturer.
 
-Beispiel für Hersteller mit Niederlassung in der EU:
+Example for manufacturers with a branch in the EU:
 * https://gpsr.zencartdemo.at/index.php?main_page=product_info&cPath=3_12&products_id=7
 
-Beispiel für Hersteller ohne Niederlassung in der EU:
+Example for manufacturers without a branch in the EU:
 * https://gpsr.zencartdemo.at/index.php?main_page=product_info&cPath=1_5&products_id=27
