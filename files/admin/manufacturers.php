@@ -1,11 +1,10 @@
 <?php
 /**
- * Zen Cart German Specific
+ * Plugin GPSR
  * @copyright Copyright 2003-2024 Zen Cart Development Team
- * Zen Cart German Version - www.zen-cart-pro.at
- * @copyright Portions Copyright 2004 osCommerce
- * @license https://www.zen-cart-pro.at/license/3_0.txt GNU General Public License V3.0
- * @version $Id: manufacturers.php for GPSR 2024-11-15 08:21:51Z webchills $
+ * @copyright Portions Copyright 2003 osCommerce
+ * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+ * @version $Id: torvista 2024 Sep 04 Modified in v2.1.0-beta1 $
  */
 require 'includes/application_top.php';
 
@@ -20,6 +19,9 @@ if (!empty($action)) {
         $manufacturers_id = (int)$_GET['mID'];
       }
       $manufacturers_name = zen_db_prepare_input($_POST['manufacturers_name']);
+
+      $featured = (!empty($_POST['featured']) ? (int)$_POST['featured'] : 0);
+//Plugin GPSR
       $manufacturers_gpsr_company = zen_db_prepare_input($_POST['manufacturers_gpsr_company']);
       $manufacturers_gpsr_contact_person = zen_db_prepare_input($_POST['manufacturers_gpsr_contact_person']);
       $manufacturers_gpsr_street = zen_db_prepare_input($_POST['manufacturers_gpsr_street']);
@@ -37,7 +39,6 @@ if (!empty($action)) {
       $manufacturers_gpsr_additional_1 = zen_db_prepare_input($_POST['manufacturers_gpsr_additional_1']);
       $manufacturers_gpsr_additional_2 = zen_db_prepare_input($_POST['manufacturers_gpsr_additional_2']);
       $manufacturers_gpsr_additional_3 = zen_db_prepare_input($_POST['manufacturers_gpsr_additional_3']);
-      
       $sql_data_array = [
        'manufacturers_name' => $manufacturers_name,
        'manufacturers_gpsr_company' => $manufacturers_gpsr_company,
@@ -58,6 +59,16 @@ if (!empty($action)) {
        'manufacturers_gpsr_additional_2' => $manufacturers_gpsr_additional_2,
        'manufacturers_gpsr_additional_3' => $manufacturers_gpsr_additional_3,       
        ];
+      //$sql_data_array = ['manufacturers_name' => $manufacturers_name];
+//eof
+
+      $sql_data_array['featured'] = $featured;
+
+      // -----
+      // Give a watching observer the opportunity to add/update additional fields in the
+      // manufacturers table.
+      //
+      $zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_INSERT_UPDATE', ['action' => $action, 'manufacturers_id' => $manufacturers_id ?? 0], $sql_data_array);
 
       if ($action === 'insert') {
         $insert_sql_data = ['date_added' => 'now()'];
@@ -95,7 +106,7 @@ if (!empty($action)) {
                           SET manufacturers_image = '" . zen_db_input($_POST['img_dir'] . $db_filename) . "'
                           WHERE manufacturers_id = " . (int)$manufacturers_id);
           } else {
-              // remove image from database if 'none'
+            // remove image from database if 'none'
             $db->Execute("UPDATE " . TABLE_MANUFACTURERS . "
                           SET manufacturers_image = ''
                           WHERE manufacturers_id = " . (int)$manufacturers_id);
@@ -144,9 +155,6 @@ if (!empty($action)) {
                     WHERE manufacturers_id = " . (int)$manufacturers_id);
       $db->Execute("DELETE FROM " . TABLE_MANUFACTURERS_INFO . "
                     WHERE manufacturers_id = " . (int)$manufacturers_id);
-      $db->Execute ("DELETE FROM " . TABLE_MANUFACTURERS_META . " 
-                    WHERE manufacturers_id = " . (int)$manufacturers_id);
-
 
       if (isset($_POST['delete_products']) && ($_POST['delete_products'] === 'on')) {
         $products = $db->Execute("SELECT products_id
@@ -162,41 +170,17 @@ if (!empty($action)) {
                       WHERE manufacturers_id = " . (int)$manufacturers_id);
       }
 
-     zen_redirect(zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '')));
-      
-      break;
-  
-
-      case 'update_manufacturer_meta_tags': 
-        $manufacturers_id = (int)$_POST['manufacturer_id'];
-        $languages = zen_get_languages();
-        for ($i=0, $n=sizeof($languages); $i<$n; $i++) {
-          $language_id = (int)$languages[$i]['id'];
-          $metatags_title = zen_db_prepare_input($_POST['metatags_title'][$language_id]);
-          $metatags_keywords = zen_db_prepare_input($_POST['metatags_keywords'][$language_id]);
-          $metatags_description = zen_db_prepare_input($_POST['metatags_description'][$language_id]);
-          if ( zen_not_null ($metatags_title) || zen_not_null ($metatags_keywords) || zen_not_null ($metatags_description) ) {
-            $sql_data_array = array('metatags_title' => $metatags_title,
-                                    'metatags_keywords' => $metatags_keywords,
-                                    'metatags_description' => $metatags_description);
-            $check = $db->Execute("SELECT * FROM " . TABLE_MANUFACTURERS_META . " WHERE manufacturers_id = $manufacturers_id AND language_id = $language_id LIMIT 1");
-            if ($check->EOF) {
-              $sql_data_array['manufacturers_id'] = $manufacturers_id;
-              $sql_data_array['language_id'] = $language_id;
-              zen_db_perform (TABLE_MANUFACTURERS_META, $sql_data_array);
-              
-            } else {
-              zen_db_perform (TABLE_MANUFACTURERS_META, $sql_data_array, 'update', "manufacturers_id = $manufacturers_id AND language_id = $language_id LIMIT 1");
-              
-            }
-          } else {
-            $db->Execute ("DELETE FROM " . TABLE_MANUFACTURERS_META . " WHERE manufacturers_id = $manufacturers_id AND language_id = $language_id LIMIT 1");
-            
-          }
-        }
       zen_redirect(zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '')));
       break;
- } 
+
+    default:
+      // -----
+      // Give a watching observer the opportunity to add/update additional fields in the
+      // manufacturers table.
+      //
+      $zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_DEFAULT_ACTION', ['action' => $action]);
+      break;
+  }
 }
 ?>
 <!doctype html>
@@ -227,45 +211,75 @@ if (!empty($action)) {
               <tr class="dataTableHeadingRow">
                 <th class="dataTableHeadingContent text-center"><?php echo TABLE_HEADING_ID; ?></th>
                 <th class="dataTableHeadingContent"><?php echo TABLE_HEADING_MANUFACTURERS; ?></th>
-                <th class="dataTableHeadingContent"><?php echo TABLE_HEADING_MANUFACTURER_COMPANY; ?></th>
-                <th class="dataTableHeadingContent"><?php echo TABLE_HEADING_IMPORT_COMPANY; ?></th>
+                <th class="dataTableHeadingContent"><?php echo TABLE_HEADING_MANUFACTURER_FEATURED; ?></th>
+<?php //Plugin GPSR: todo move to observer ?>
+<th class="dataTableHeadingContent"><?php echo TABLE_HEADING_MANUFACTURER_COMPANY; ?></th>
+<th class="dataTableHeadingContent"><?php echo TABLE_HEADING_IMPORT_COMPANY; ?></th>
+<? // eof ?>
+
+<?php
+// -----
+// A watching observer can add extra table column headings via an associative array in the form:
+//
+// $extra_headings = [
+//     [
+//       'align' => $alignment,    // One of 'center', 'right', or 'left' (optional)
+//       'text' => $value
+//     ],
+// ];
+//
+// Observer note:  Be sure to check that the $p2/$extra_headings value is specifically (bool)false before initializing, since
+// multiple observers might be injecting content!
+//
+$extra_headings = false;
+$zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_EXTRA_COLUMN_HEADING', [], $extra_headings);
+if (is_array($extra_headings)) {
+  foreach ($extra_headings as $heading_info) {
+      $align = (isset($heading_info['align'])) ? (' text-' . $heading_info['align']) : '';
+?>
+                <th class="dataTableHeadingContent<?php echo $align; ?>"><?php echo $heading_info['text']; ?></th>
+<?php
+    }
+}
+?>
                 <th class="dataTableHeadingContent text-right"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</th>
               </tr>
             </thead>
             <tbody>
-                <?php
-                $manufacturers_query_raw = "SELECT *
-                                            from " . TABLE_MANUFACTURERS . "
-                                            order by manufacturers_name";
+              <?php
+              $manufacturers_query_raw =
+                "SELECT *, (featured=1) AS weighted
+                   FROM " . TABLE_MANUFACTURERS . "
+                  ORDER BY weighted DESC, manufacturers_name";
 
-// reset page when page is unknown
-                if ((empty($_GET['page']) || $_GET['page'] == '1') && !empty($_GET['mID'])) {
-                  $check_page = $db->Execute($manufacturers_query_raw);
+              // reset page when page is unknown
+              if ((empty($_GET['page']) || $_GET['page'] == '1') && !empty($_GET['mID'])) {
+                $check_page = $db->Execute($manufacturers_query_raw);
                 $check_count = 0;
-                  if ($check_page->RecordCount() > MAX_DISPLAY_SEARCH_RESULTS) {
-                    foreach ($check_page as $item) {
-                      if ($item['manufacturers_id'] == $_GET['mID']) {
-                        break;
-                      }
-                      $check_count++;
+                if ($check_page->RecordCount() > MAX_DISPLAY_SEARCH_RESULTS) {
+                  foreach ($check_page as $item) {
+                    if ($item['manufacturers_id'] == $_GET['mID']) {
+                      break;
                     }
-                    $_GET['page'] = round((($check_count / MAX_DISPLAY_SEARCH_RESULTS) + (fmod_round($check_count, MAX_DISPLAY_SEARCH_RESULTS) != 0 ? .5 : 0)), 0);
-                  } else {
-                    $_GET['page'] = 1;
+                    $check_count++;
                   }
+                  $_GET['page'] = round((($check_count / MAX_DISPLAY_SEARCH_RESULTS) + (fmod_round($check_count, MAX_DISPLAY_SEARCH_RESULTS) != 0 ? .5 : 0)), 0);
+                } else {
+                  $_GET['page'] = 1;
                 }
+              }
 
-                $manufacturers_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $manufacturers_query_raw, $manufacturers_query_numrows);
-                $manufacturers = $db->Execute($manufacturers_query_raw);
-                foreach ($manufacturers as $manufacturer) {
+              $manufacturers_split = new splitPageResults($_GET['page'], MAX_DISPLAY_SEARCH_RESULTS, $manufacturers_query_raw, $manufacturers_query_numrows);
+              $manufacturers = $db->Execute($manufacturers_query_raw);
+              foreach ($manufacturers as $manufacturer) {
                 if ((!isset($_GET['mID']) || (isset($_GET['mID']) && ($_GET['mID'] == $manufacturer['manufacturers_id']))) && !isset($mInfo) && (substr($action, 0, 3) !== 'new')) {
-                    $manufacturer_products = $db->Execute("SELECT COUNT(*) AS products_count
-                                                           FROM " . TABLE_PRODUCTS . "
-                                                           WHERE manufacturers_id = " . (int)$manufacturer['manufacturers_id']);
+                  $manufacturer_products = $db->Execute("SELECT COUNT(*) AS products_count
+                                                         FROM " . TABLE_PRODUCTS . "
+                                                         WHERE manufacturers_id = " . (int)$manufacturer['manufacturers_id']);
 
-                    $mInfo_array = array_merge($manufacturer, $manufacturer_products->fields);
-                    $mInfo = new objectInfo($mInfo_array);
-                  }
+                  $mInfo_array = array_merge($manufacturer, $manufacturer_products->fields);
+                  $mInfo = new objectInfo($mInfo_array);
+                }
 
                 if (isset($mInfo) && is_object($mInfo) && ($manufacturer['manufacturers_id'] == $mInfo->manufacturers_id)) {
                   ?>
@@ -274,41 +288,52 @@ if (!empty($action)) {
                   <tr class="dataTableRow" onclick="document.location.href = '<?php echo zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $manufacturer['manufacturers_id'] . '&action=edit'); ?>'" style="cursor:pointer;">
                   <?php } ?>
                   <td class="dataTableContent text-center"><?php echo $manufacturer['manufacturers_id']; ?></td>
-                  <td class="dataTableContent"><?php echo $manufacturer['manufacturers_name']; ?></td>  
+                  <td class="dataTableContent"><?php echo $manufacturer['manufacturers_name']; ?></td>
+                  <td class="dataTableContent"><?php echo $manufacturer['featured'] ? '<strong>' . TEXT_YES . '</strong>' : TEXT_NO; ?></td>
+<?php //Plugin GPSR: todo move to observer ?>
                   <td class="dataTableContent"><?php echo $manufacturer['manufacturers_gpsr_company']; ?></td>
-                  <td class="dataTableContent"><?php echo $manufacturer['manufacturers_gpsr_company_noneu']; ?></td>                
-                  <td class="dataTableContent text-right">
-                    <a href="<?php echo zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $manufacturer['manufacturers_id'] . '&action=edit'); ?>" title="<?php echo ICON_EDIT; ?>" role="button">
-                      <div class="fa-stack fa-fw">
-                        <i class="fa fa-circle fa-stack-2x txt-status-on"></i>
-                        <i class="fa fa-pencil fa-stack-1x fa-inverse"></i>
-                      </div>
-                    </a>
-                    <a href="<?php echo zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $manufacturer['manufacturers_id'] . '&action=delete'); ?>" title="<?php echo ICON_DELETE; ?>">
-                      <div class="fa-stack fa-fw">
-                        <i class="fa fa-circle fa-stack-2x txt-status-off"></i>
-                        <i class="fa fa-trash fa-stack-1x fa-inverse"></i>
-                      </div>
-                    </a>
-		    
-		                      <?php
-
-    if (zen_get_manufacturer_metatags_keywords ($manufacturers->fields['manufacturers_id'], $_SESSION['languages_id']) != '' || zen_get_manufacturer_metatags_description ($manufacturers->fields['manufacturers_id'], $_SESSION['languages_id']) != '' || zen_get_manufacturer_metatags_title ($manufacturers->fields['manufacturers_id'], $_SESSION['languages_id']) != '') {
-      $metatags_icon = zen_image(DIR_WS_IMAGES . 'icon_edit_metatags_on.gif', ICON_METATAGS_ON);
-      
-    } else {
-      $metatags_icon = zen_image(DIR_WS_IMAGES . 'icon_edit_metatags_off.gif', ICON_METATAGS_OFF);
-      
-    }
-    echo '<a href="' . zen_href_link(FILENAME_MANUFACTURERS, 'page=' . $_GET['page'] . '&mID=' . $manufacturers->fields['manufacturers_id'] . '&action=edit_manufacturer_meta_tags') . '">' . $metatags_icon . '</a>';
-
+                  <td class="dataTableContent"><?php echo $manufacturer['manufacturers_gpsr_company_noneu']; ?></td> 
+<?php // eof ?>
+<?php
+// -----
+// A watching observer can provide any added manufacturers' fields' values to the listing
+// via an associative array in the form:
+//
+// $extra_data = [
+//     [
+//       'align' => $alignment,    // One of 'center', 'right', or 'left' (optional)
+//       'text' => $value
+//     ],
+// ];
+//
+// Observer note:  Be sure to check that the $p2/$extra_data value is specifically (bool)false before initializing, since
+// multiple observers might be injecting content!
+//
+$extra_data = false;
+$zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_EXTRA_COLUMN_DATA', $manufacturer, $extra_data);
+if (is_array($extra_data)) {
+    foreach ($extra_data as $data_info) {
+        $align = (isset($data_info['align'])) ? (' text-' . $data_info['align']) : '';
 ?>
-
-                    <?php if (isset($mInfo) && is_object($mInfo) && ($manufacturer['manufacturers_id'] == $mInfo->manufacturers_id)) { ?>
-                      <i class="fa fa-caret-right fa-2x fa-fw txt-navy align-middle"></i>
-                    <?php } else { ?>
+                  <td class="dataTableContent<?php echo $align; ?>"><?php echo $data_info['text']; ?></td>
+<?php
+    }
+}
+?>
+                  <td class="dataTableContent text-right actions">
+                    <div class="btn-group">
+                    <a href="<?php echo zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $manufacturer['manufacturers_id'] . '&action=edit'); ?>" class="btn btn-sm btn-default btn-edit" role="button" data-toggle="tooltip" title="<?php echo ICON_EDIT ?>">
+                      <?php echo zen_icon('pencil', hidden: true) ?>
+                    </a>
+                    <a href="<?php echo zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $manufacturer['manufacturers_id'] . '&action=delete'); ?>" class="btn btn-sm btn-default btn-delete" role="button" data-toggle="tooltip" title="<?php echo ICON_DELETE ?>">
+                      <?php echo zen_icon('trash', hidden: true) ?>
+                    </a>
+                    </div>
+                    <?php if (isset($mInfo) && is_object($mInfo) && ($manufacturer['manufacturers_id'] == $mInfo->manufacturers_id)) {
+                      echo zen_icon('caret-right', '', '2x', true);
+                    } else { ?>
                       <a href="<?php echo zen_href_link(FILENAME_MANUFACTURERS, zen_get_all_get_params(['mID']) . 'mID=' . $manufacturer['manufacturers_id']); ?>">
-                        <i class="fa fa-info-circle fa-2x fa-fw txt-black align-middle"></i>
+                        <?php echo zen_icon('circle-info', '', '2x', true, true) ?>
                       </a>
                     <?php } ?>
                   </td>
@@ -318,51 +343,41 @@ if (!empty($action)) {
           </table>
         </div>
         <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 configurationColumnRight">
-            <?php
+          <?php
           $heading = [];
           $contents = [];
 
-            switch ($action) {
-
-    case 'edit_manufacturer_meta_tags': {
-      $manufacturers_id = (int)zen_db_prepare_input($_GET['mID']);
-      $heading[] = array('text' => '<strong>' . TEXT_INFO_HEADING_EDIT_MANUFACTURER_META_TAGS . '</strong>');
-      $contents = array('form' => zen_draw_form('manufacturers', FILENAME_MANUFACTURERS, 'action=update_manufacturer_meta_tags&mID=' . $manufacturers_id, 'post', 'enctype="multipart/form-data"') . zen_draw_hidden_field('manufacturer_id', $manufacturers_id ));
-      $contents[] = array('text' => TEXT_EDIT_MANUFACTURER_META_TAGS_INTRO . ' - <strong>' . $manufacturers_id  . ' ' . $mInfo->manufacturers_name . '</strong>');
-
-      $languages = zen_get_languages();
-
-      $manufacturer_inputs_string_metatags_title = '';
-      for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {    
-        $manufacturer_inputs_string_metatags_title .= '<br>' . zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']) . '&nbsp;' . zen_draw_input_field('metatags_title[' . $languages[$i]['id'] . ']', zen_get_manufacturer_metatags_title($manufacturers_id , $languages[$i]['id']), zen_set_field_length(TABLE_MANUFACTURERS_META, 'metatags_title'));
-        
-      }
-      $contents[] = array('text' => '<br>' . TEXT_EDIT_MANUFACTURER_META_TAGS_TITLE . $manufacturer_inputs_string_metatags_title);
-
-      $manufacturer_inputs_string_metatags_keywords = '';
-      for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-        $manufacturer_inputs_string_metatags_keywords .= '<br>' . zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']) . '&nbsp;';
-        $manufacturer_inputs_string_metatags_keywords .= zen_draw_textarea_field('metatags_keywords[' . $languages[$i]['id'] . ']', 'soft', '100%', '20', zen_get_manufacturer_metatags_keywords($manufacturers_id , $languages[$i]['id']));
-      }
-      $contents[] = array('text' => '<br>' . TEXT_EDIT_MANUFACTURER_META_TAGS_KEYWORDS . $manufacturer_inputs_string_metatags_keywords);
-
-      $manufacturer_inputs_string_metatags_description = '';
-      for ($i = 0, $n = sizeof($languages); $i < $n; $i++) {
-        $manufacturer_inputs_string_metatags_description .= '<br>' . zen_image(DIR_WS_CATALOG_LANGUAGES . $languages[$i]['directory'] . '/images/' . $languages[$i]['image'], $languages[$i]['name']) . '&nbsp;' ;
-        $manufacturer_inputs_string_metatags_description .= zen_draw_textarea_field('metatags_description[' . $languages[$i]['id'] . ']', 'soft', '100%', '20', zen_get_manufacturer_metatags_description($manufacturers_id , $languages[$i]['id']));
-      }
-      $contents[] = array('text' => '<br>' . TEXT_EDIT_MANUFACTURERS_META_TAGS_DESCRIPTION.$manufacturer_inputs_string_metatags_description);
-
-      $contents[] = array('align' => 'center', 'text' => '<br>' . zen_image_submit('button_save.gif', IMAGE_SAVE) . ' <a href="' . zen_href_link(FILENAME_MANUFACTURERS, '&mID=' . $manufacturers_id ) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
-      break;
-    }
-
-              case 'new':
+          switch ($action) {
+            case 'new':
               $heading[] = ['text' => '<h4>' . TEXT_HEADING_NEW_MANUFACTURER . '</h4>'];
 
               $contents = ['form' => zen_draw_form('manufacturers', FILENAME_MANUFACTURERS, 'action=insert', 'post', 'enctype="multipart/form-data" class="form-horizontal"')];
               $contents[] = ['text' => TEXT_NEW_INTRO];
-              $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_NAME, 'manufacturers_name', 'class="control-label"') . zen_draw_input_field('manufacturers_name', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_name') . ' class="form-control" id="manufacturers_name"')];
+              $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_NAME, 'manufacturers_name', 'class="control-label"') . zen_draw_input_field('manufacturers_name', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_name') . ' class="form-control" id="manufacturers_name" required')];
+              $contents[] = ['text' => '<label class="checkbox-inline">' . zen_draw_checkbox_field('featured') . TEXT_MANUFACTURER_FEATURED_LABEL . '</label>'];
+
+              // -----
+              // Give a watching observer the opportunity to add additional content to the sidebox
+              // form to gather any new fields it might support via an array of arrays in the form:
+              //
+              // $additional_contents = [
+              //     [
+              //       'align' => $alignment,    // (Optional) One of 'text-center', 'text-right', or 'text-left'.
+              //       'text' => $value
+              //     ],
+              // ];
+              //
+              // Observer note:  Be sure to check that the $p2/$extra_data value is specifically (bool)false before initializing, since
+              // multiple observers might be injecting content!
+              //
+              $additional_contents = false;
+              $zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_NEW', '', $additional_contents);
+              if (is_array($additional_contents)) {
+                  foreach ($additional_contents as $next_addition) {
+                      $contents[] = $next_addition;
+                  }
+              }
+
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_IMAGE, 'manufacturers_image', 'class="control-label"') . zen_draw_file_field('manufacturers_image', '', 'class="form-control" id="manufacturers_image"')];
               $dir_info = zen_build_subdirectories_array(DIR_FS_CATALOG_IMAGES);
               $default_directory = 'manufacturers/';
@@ -377,7 +392,7 @@ if (!empty($action)) {
               }
 
               $contents[] = ['text' => '<p class="p_label control-label">' . TEXT_MANUFACTURERS_URL . '</p>' . $manufacturer_inputs_string];
-              
+//Plugin GPSR
               $contents[] = ['text' => TEXT_MANUFACTURERS_GPSR_GENERAL];
              
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_COMPANY, 'manufacturers_gpsr_company', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_company', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_company') . ' class="form-control" id="manufacturers_gpsr_company"')];
@@ -403,9 +418,8 @@ if (!empty($action)) {
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_1, 'manufacturers_gpsr_additional_1', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_1', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_1') . ' class="form-control" id="manufacturers_gpsr_additional_1"')];
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_2, 'manufacturers_gpsr_additional_2', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_2', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_2') . ' class="form-control" id="manufacturers_gpsr_additional_2"')];
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_3, 'manufacturers_gpsr_additional_3', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_3', '', zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_3') . ' class="form-control" id="manufacturers_gpsr_additional_3"')];
-              
+//eof
               $contents[] = ['align' => 'text-center', 'text' => '<button type="submit" class="btn btn-primary">' . IMAGE_SAVE . '</button> <a href="' . zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . ($_GET['mID'] ?? '')) . '" class="btn btn-default" role="button">' . IMAGE_CANCEL . '</a>'];
-                
               break;
             case 'edit':
               $heading[] = ['text' => '<h4>' . TEXT_HEADING_EDIT_MANUFACTURER . '</h4>'];
@@ -413,6 +427,30 @@ if (!empty($action)) {
               $contents = ['form' => zen_draw_form('manufacturers', FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $mInfo->manufacturers_id . '&action=save', 'post', 'enctype="multipart/form-data" class="form-horizontal"')];
               $contents[] = ['text' => TEXT_INFO_EDIT_INTRO];
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_NAME, 'manufacturers_name', 'class="control-label"') . zen_draw_input_field('manufacturers_name', htmlspecialchars($mInfo->manufacturers_name, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_name') . ' class="form-control" id="manufacturers_name" required')];
+              $contents[] = ['text' => '<label class="checkbox-inline">' . zen_draw_checkbox_field('featured', '1', $mInfo->featured) . TEXT_MANUFACTURER_FEATURED_LABEL . '</label>'];
+
+              // -----
+              // Give a watching observer the opportunity to add additional content to the sidebox
+              // form to manage any new fields it might support via an array of arrays in the form:
+              //
+              // $additional_contents = [
+              //     [
+              //       'align' => $alignment,    // (Optional) One of 'text-center', 'text-right', or 'text-left'.
+              //       'text' => $value
+              //     ],
+              // ];
+              //
+              // Observer note:  Be sure to check that the $p2/$extra_data value is specifically (bool)false before initializing, since
+              // multiple observers might be injecting content!
+              //
+              $additional_contents = false;
+              $zco_notifier->notify('NOTIFY_ADMIN_MANUFACTURERS_EDIT', $mInfo, $additional_contents);
+              if (is_array($additional_contents)) {
+                  foreach ($additional_contents as $next_addition) {
+                      $contents[] = $next_addition;
+                  }
+              }
+
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_IMAGE, 'manufacturers_image', 'class="control-label"') . zen_draw_file_field('manufacturers_image', '', ' class="form-control" id="manufacturers_image"') . '<br>' . $mInfo->manufacturers_image];
               $dir_info = zen_build_subdirectories_array(DIR_FS_CATALOG_IMAGES);
               $default_directory = ($mInfo->manufacturers_image === null) ? '/' : substr($mInfo->manufacturers_image, 0, strpos($mInfo->manufacturers_image, '/') + 1);
@@ -428,7 +466,7 @@ if (!empty($action)) {
               }
 
               $contents[] = ['text' => '<p class="p_label control-label">' . TEXT_MANUFACTURERS_URL . '</p>' . $manufacturer_inputs_string];
-              
+//Plugin GPSR
               $contents[] = ['text' => TEXT_MANUFACTURERS_GPSR_GENERAL];
            
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_COMPANY, 'manufacturers_gpsr_company', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_company', htmlspecialchars($mInfo->manufacturers_gpsr_company ?? '', ENT_COMPAT, CHARSET, true) , zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_company') . ' class="form-control" id="manufacturers_gpsr_company"')];
@@ -454,7 +492,7 @@ if (!empty($action)) {
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_1, 'manufacturers_gpsr_additional_1', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_1', htmlspecialchars($mInfo->manufacturers_gpsr_additional_1 ?? '', ENT_COMPAT, CHARSET, true), zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_1') . ' class="form-control" id="manufacturers_gpsr_additional_1"')];
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_2, 'manufacturers_gpsr_additional_2', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_2', htmlspecialchars($mInfo->manufacturers_gpsr_additional_2 ?? '', ENT_COMPAT, CHARSET, true), zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_2') . ' class="form-control" id="manufacturers_gpsr_additional_2"')];
               $contents[] = ['text' => zen_draw_label(TEXT_MANUFACTURERS_GPSR_ADDITIONAL_3, 'manufacturers_gpsr_additional_3', 'class="control-label"') . zen_draw_input_field('manufacturers_gpsr_additional_3', htmlspecialchars($mInfo->manufacturers_gpsr_additional_3 ?? '', ENT_COMPAT, CHARSET, true), zen_set_field_length(TABLE_MANUFACTURERS, 'manufacturers_gpsr_additional_3') . ' class="form-control" id="manufacturers_gpsr_additional_3"')];
-              
+//eof
               $contents[] = ['align' => 'text-center', 'text' => '<button type="submit" class="btn btn-primary">' . IMAGE_SAVE . '</button> <a href="' . zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $mInfo->manufacturers_id) . '" class="btn btn-default" role="button">' . IMAGE_CANCEL . '</a>'];
               break;
             case 'delete':
@@ -477,7 +515,9 @@ if (!empty($action)) {
                 $heading[] = ['text' => '<h4>' . $mInfo->manufacturers_name . '</h4>'];
 
                 $contents[] = ['align' => 'text-center', 'text' => '<a href="' . zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $mInfo->manufacturers_id . '&action=edit') . '" class="btn btn-primary" role="button">' . IMAGE_EDIT . '</a> <a href="' . zen_href_link(FILENAME_MANUFACTURERS, ($currentPage != 0 ? 'page=' . $currentPage . '&' : '') . 'mID=' . $mInfo->manufacturers_id . '&action=delete') . '" class="btn btn-warning" role="button">' . IMAGE_DELETE . '</a>'];
-                
+                if ($mInfo->featured) {
+                  $contents[] = ['align' => 'text-center', 'text' => '<strong>' . TEXT_MANUFACTURER_IS_FEATURED . '</strong>'];
+                }
                 $contents[] = ['text' => TEXT_INFO_DATE_ADDED . ' ' . zen_date_short($mInfo->date_added)];
                 if (zen_not_null($mInfo->last_modified)) {
                   $contents[] = ['text' => TEXT_INFO_LAST_MODIFIED . ' ' . zen_date_short($mInfo->last_modified)];
@@ -490,9 +530,9 @@ if (!empty($action)) {
 
           if (!empty($heading) && !empty($contents)) {
             $box = new box();
-              echo $box->infoBox($heading, $contents);
-            }
-            ?>
+            echo $box->infoBox($heading, $contents);
+          }
+          ?>
         </div>
         <!-- body_text_eof //-->
       </div>
@@ -505,13 +545,13 @@ if (!empty($action)) {
         </div>
       <?php } ?>
       <div class="row">
-          <table class="table">
-            <tr>
-              <td><?php echo $manufacturers_split->display_count($manufacturers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_MANUFACTURERS); ?></td>
-              <td class="text-right"><?php echo $manufacturers_split->display_links($manufacturers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></td>
-            </tr>
-          </table>
-        </div>
+        <table class="table">
+          <tr>
+            <td><?php echo $manufacturers_split->display_count($manufacturers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_MANUFACTURERS); ?></td>
+            <td class="text-right"><?php echo $manufacturers_split->display_links($manufacturers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS, MAX_DISPLAY_PAGE_LINKS, $_GET['page']); ?></td>
+          </tr>
+        </table>
+      </div>
       <!-- body_eof //-->
     </div>
     <!-- footer //-->
