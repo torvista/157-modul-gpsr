@@ -1,3 +1,7 @@
+Fileset modified to match Zen Cart 2.1.0.  
+It's working, but needs multiple tweaks, which I'll get round to.   
+English texts are direct from Google Translate.  
+
 # 157-modul-gpsr
 GPSR manufacturer information for Zen Cart 1.5.7 German
 
