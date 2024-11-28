@@ -1,26 +1,27 @@
 <?php
-/**
- *  product_info main_template_vars.php
- *
- * Zen Cart German Specific (158 code in 157)
+    /**
+     *  Plugin GPSR
+     *  product_info main_template_vars.php
+     *
  * @copyright Copyright 2003-2024 Zen Cart Development Team
- * Zen Cart German Version - www.zen-cart-pro.at
- * @copyright Portions Copyright 2003 osCommerce
- * @license https://www.zen-cart-pro.at/license/3_0.txt GNU General Public License V3.0
- * @version $Id: main_template_vars.php for GPSR 2024-11-18 19:21:36Z webchills $
- */
-/*
- * Extracts and constructs the data to be used in the product-type template tpl_TYPEHANDLER_info_display.php
- */
+     * @copyright Portions Copyright 2003 osCommerce
+     * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+     * @version $Id: Scott Wilson 2024 Sep 17 Modified in v2.1.0-beta1 $
+     */
+    /*
+     * Extracts and constructs the data to be used in the product-type template tpl_TYPEHANDLER_info_display.php
+     */
 
 // This should be first line of the script:
     $zco_notifier->notify('NOTIFY_MAIN_TEMPLATE_VARS_START_PRODUCT_INFO');
 
-    if (!isset($product_info->EOF, $product_info->fields['products_id'], $product_info->fields['products_status']) || (int)$product_info->fields['products_id'] !== (int)$_GET['products_id']) {
-        $product_info = zen_get_product_details($_GET['products_id']);
+    $product_info = $product_info ?? new Product((int)$_GET['products_id']);
+
+    if (!isset($product_info->fields['products_id'], $product_info->fields['products_status']) || (int)$product_info->fields['products_id'] !== (int)$_GET['products_id']) {
+        $product_info = new Product((int)$_GET['products_id']);
     }
 
-    $product_not_found = $product_info->EOF;
+    $product_not_found = !$product_info->exists();
 
     if (!defined('DISABLED_PRODUCTS_TRIGGER_HTTP200') || DISABLED_PRODUCTS_TRIGGER_HTTP200 !== 'true') {
         if (!$product_not_found && $product_info->fields['products_status'] != 1) {
@@ -40,7 +41,8 @@
 
         $products_price = $currencies->display_price($product_info->fields['products_price'], zen_get_tax_rate($product_info->fields['products_tax_class_id']));
 
-        $manufacturers_name = zen_get_products_manufacturers_name((int)$_GET['products_id']);
+        $manufacturers_name = $product_info->fields['manufacturers_name'];
+//Plugin GPSR
         $manufacturers_gpsr_company = zen_get_products_manufacturers_gpsr_company((int)$_GET['products_id']);
         $manufacturers_gpsr_contact_person = zen_get_products_manufacturers_gpsr_contact_person((int)$_GET['products_id']);
         $manufacturers_gpsr_street = zen_get_products_manufacturers_gpsr_street((int)$_GET['products_id']);
@@ -58,7 +60,7 @@
         $manufacturers_gpsr_additional_1 = zen_get_products_manufacturers_gpsr_additional_1((int)$_GET['products_id']);
         $manufacturers_gpsr_additional_2 = zen_get_products_manufacturers_gpsr_additional_2((int)$_GET['products_id']);
         $manufacturers_gpsr_additional_3 = zen_get_products_manufacturers_gpsr_additional_3((int)$_GET['products_id']);
-
+//eof
         if ($new_price = zen_get_products_special_price($product_info->fields['products_id'])) {
             $specials_price = $currencies->display_price($new_price, zen_get_tax_rate($product_info->fields['products_tax_class_id']));
         }
@@ -72,25 +74,26 @@
         $review_status = " AND r.status = 1";
 
         $reviews_query = "SELECT count(*) AS count FROM " . TABLE_REVIEWS . " r, "
-          . TABLE_REVIEWS_DESCRIPTION . " rd
+                                                          . TABLE_REVIEWS_DESCRIPTION . " rd
                        WHERE r.products_id = " . (int)$_GET['products_id'] . "
                        AND r.reviews_id = rd.reviews_id
                        AND rd.languages_id = " . (int)$_SESSION['languages_id'] .
-          $review_status;
+                       $review_status;
 
         $reviews = $db->Execute($reviews_query);
 
-        $products_name = $product_info->fields['products_name'];
+        $products_name = $product_info->fields['lang'][$_SESSION['languages_code']]['products_name'];
         $products_model = $product_info->fields['products_model'];
         // if no common markup tags in description, add line breaks for readability:
-        $products_description = (!preg_match('/(<br|<p|<div|<dd|<li|<span)/i', $product_info->fields['products_description']) ? nl2br($product_info->fields['products_description']) : $product_info->fields['products_description']);
+        $products_description = $product_info->fields['lang'][$_SESSION['languages_code']]['products_description'] ?? '';
+        $products_description = (!preg_match('/(<br|<p|<div|<dd|<li|<span)/i', $products_description) ? nl2br($products_description) : $products_description);
 
         $products_image = (($product_not_found || $product_info->fields['products_image'] == '') && PRODUCTS_IMAGE_NO_IMAGE_STATUS == '1') ? PRODUCTS_IMAGE_NO_IMAGE : '';
         if ($product_info->fields['products_image'] != '' || PRODUCTS_IMAGE_NO_IMAGE_STATUS != '1') {
             $products_image = $product_info->fields['products_image'];
         }
 
-        $products_url = $product_info->fields['products_url'];
+        $products_url = $product_info->fields['lang'][$_SESSION['languages_code']]['products_url'];
         $products_date_available = $product_info->fields['products_date_available'];
         $products_date_added = $product_info->fields['products_date_added'];
         $products_manufacturer = $manufacturers_name;
@@ -132,24 +135,8 @@
          * Load all *.PHP files from the /includes/templates/MYTEMPLATE/PAGENAME/extra_main_template_vars
          */
         $extras_dir = $template->get_template_dir('.php', DIR_WS_TEMPLATE, $current_page_base . 'extra_main_template_vars', $current_page_base . '/' . 'extra_main_template_vars');
-        if ($dir = @dir($extras_dir)) {
-            while ($file = $dir->read()) {
-                if (!is_dir($extras_dir . '/' . $file)) {
-                    if (preg_match('~^[^\._].*\.php$~i', $file) > 0) {
-                        $directory_array[] = '/' . $file;
-                    }
-                }
-            }
-            $dir->close();
-        }
-        if (sizeof($directory_array)) {
-            sort($directory_array);
-        }
-
-        for ($i = 0, $n = sizeof($directory_array); $i < $n; $i++) {
-            if (file_exists($extras_dir . $directory_array[$i])) {
-                include($extras_dir . $directory_array[$i]);
-            }
+        foreach(zen_get_files_in_directory($extras_dir) as $file) {
+            include($file);
         }
 
 // build show flags from product type layout settings
@@ -167,7 +154,9 @@
         $flag_show_product_info_additional_images = zen_get_show_product_switch($_GET['products_id'], 'additional_images');
         $flag_show_product_info_free_shipping = zen_get_show_product_switch($_GET['products_id'], 'always_free_shipping_image_switch');
         $flag_show_ask_a_question = !empty(zen_get_show_product_switch($_GET['products_id'], 'ask_a_question'));
+//Plugin GPSR
         $flag_show_gpsr = !empty(zen_get_show_product_switch($_GET['products_id'], 'gpsr'));
+//eof
         require(DIR_WS_MODULES . zen_get_module_directory(FILENAME_PRODUCTS_QUANTITY_DISCOUNTS));
 
         $zco_notifier->notify('NOTIFY_MAIN_TEMPLATE_VARS_EXTRA_PRODUCT_INFO');
