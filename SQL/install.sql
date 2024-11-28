@@ -21,8 +21,13 @@ ADD COLUMN manufacturers_gpsr_additional_1 VARCHAR(255) AFTER manufacturers_gpsr
 ADD COLUMN manufacturers_gpsr_additional_2 VARCHAR(255) AFTER manufacturers_gpsr_additional_1,
 ADD COLUMN manufacturers_gpsr_additional_3 VARCHAR(255) AFTER manufacturers_gpsr_additional_2;
 
-INSERT IGNORE INTO product_type_layout (configuration_title, configuration_key, configuration_value, configuration_description, product_type_id, sort_order, date_added, set_function, last_modified) VALUES
-('Show GPSR Manufacturer Info', 'SHOW_PRODUCT_INFO_GPSR', '0', 'Should the extended GPSR manufacturer information stored under Webshop > Manufacturer be displayed on the item detail page?<br>0= off 1= on', 1, 3, NOW(), 'zen_cfg_select_drop_down(array(array(\'id\'=>\'1\', \'text\'=>\'True\'), array(\'id\'=>\'0\', \'text\'=>\'False\')), ', NOW());
+# Insert default english text to Product General (product_type_id = 1).
+# Maybe you need to copy/repeat for your custom product types (using product_type_id = ?).
+INSERT IGNORE INTO product_type_layout (configuration_title, configuration_key, configuration_value, configuration_description, product_type_id, sort_order, date_added, set_function, last_modified) 
+VALUES 
+('Show GPSR Manufacturer Info', 'SHOW_PRODUCT_INFO_GPSR', '0', 'Should the extended GPSR manufacturer info be displayed on the product page?', 1, 3, NOW(), 'zen_cfg_select_drop_down(array(array(\'id\'=>\'1\', \'text\'=>\'True\'), array(\'id\'=>\'0\', \'text\'=>\'False\')), ', NOW());
 
-REPLACE INTO product_type_layout_language (configuration_title, configuration_key, languages_id, configuration_description, last_modified, date_added) VALUES
-('GPSR Herstellerinfo anzeigen', 'SHOW_PRODUCT_INFO_GPSR', 43, 'Sollen die unter Webshop > Hersteller hinterlegten erweiterten GPSR Herstellerinformationen auf der Artikeldetailseite angezeigt werden?<br/> 0= AUS 1= AN', NOW(), NOW());
+#optionally replace with german text
+#REPLACE INTO product_type_layout_language (configuration_title, configuration_key, languages_id, configuration_description, last_modified, date_added) 
+#VALUES 
+#('GPSR Herstellerinfo anzeigen', 'SHOW_PRODUCT_INFO_GPSR', 43, 'Sollen die unter Webshop > Hersteller hinterlegten erweiterten GPSR Herstellerinformationen auf der Artikeldetailseite angezeigt werden?<br/> 0= AUS 1= AN', NOW(), NOW());
