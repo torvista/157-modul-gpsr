@@ -1,0 +1,27 @@
+/* CSS styles for the GPSR manufacturer info on the product_info page*/
+
+.gpsrDetails {
+    margin-bottom: .6em;
+}
+
+#gpsrInfo p {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin:0;
+}
+
+#gpsrInfo ul {
+    font-size: 1em;
+    line-height: 100%;
+    padding-top: 0;
+    margin:0;
+}
+
+#gpsrEu {
+}
+
+#gpsrNonEu {
+}
+
+#gpsrAdditional {
+}
