@@ -3,7 +3,6 @@
 declare(strict_types=1);
 /**
  *  Plugin GPSR
- *  product_info main_template_vars.php
  *
  * @copyright Copyright 2003-2024 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce

@@ -24,11 +24,13 @@ $define = [
     'TABLE_HEADING_MANUFACTURER_FEATURED' => 'Featured?',
     'TEXT_MANUFACTURER_FEATURED_LABEL' => 'Featured?',
     'TEXT_MANUFACTURER_IS_FEATURED' => 'Featured',
-//GPSR additions	
-    'TEXT_MANUFACTURERS_GPSR_GENERAL' => '<b>GPSR Additional Info for Manufacturer:</b>',
-    'TEXT_MANUFACTURERS_GPSR_NONEU' => '<b>Additional Info about importer for manufacturers outside EU:</b>',
+//GPSR additions
+    'TABLE_HEADING_MANUFACTURER_COMPANY' => 'GPSR Manufacturer Company Name',
+    'TABLE_HEADING_IMPORT_COMPANY' => 'GPSR Importer Company Name',
+//edit
+    'TEXT_MANUFACTURERS_GPSR_GENERAL' => '<b>GPSR Manufacturer Info:</b>',
+    'TEXT_MANUFACTURERS_GPSR_NONEU' => '<b>Importer details for non-EU manufacturers:</b>',
     'TEXT_MANUFACTURERS_GPSR_ADDITIONAL' => '<b>Other optional texts:</b>',
-
     'TEXT_MANUFACTURERS_GPSR_COMPANY' => 'Manufacturer Company Name:',
     'TEXT_MANUFACTURERS_GPSR_COMPANY_NONEU' => 'Importer Company Name:',
     'TEXT_MANUFACTURERS_GPSR_CONTACT_PERSON' => 'Manufacturer Contact Person:',
@@ -41,8 +43,7 @@ $define = [
     'TEXT_MANUFACTURERS_GPSR_ADDITIONAL_1' => 'Additional Info 1:',
     'TEXT_MANUFACTURERS_GPSR_ADDITIONAL_2' => 'Additional Info 2:',
     'TEXT_MANUFACTURERS_GPSR_ADDITIONAL_3' => 'Additional Info 3:',
-    'TABLE_HEADING_MANUFACTURER_COMPANY' => 'GPSR Manufacturer Company Name',
-    'TABLE_HEADING_IMPORT_COMPANY' => 'GPSR Importer Company Name',
+
 ];
 
 return $define;
