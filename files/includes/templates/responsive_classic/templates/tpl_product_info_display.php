@@ -222,44 +222,50 @@ if ($products_description != '') {
 ?>
 <!--eof Product description -->
 <!--bof GPSR  -->
-<?php if ($flag_show_gpsr) { ?>
-<?php if (!empty($manufacturers_gpsr_company)) { ?>
-<div id="gpsrinfo" class="productGeneral">
-<ul id="gpsrDetailsList">
-	<?php echo '<li><b>' . TEXT_MANUFACTURER_GPSR_INFO . '' . $manufacturers_name . '</b></li>'; ?>
-	<?php echo '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_INFO . '</li>'; ?>
-	<?php echo '<li>&nbsp; </li>'; ?>
-	<?php echo '<li>' . TEXT_MANUFACTURER_GPSR_ADDRESS_INFO . '</li>'; ?>
-  <?php echo ((!empty($manufacturers_gpsr_company)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COMPANY . $manufacturers_gpsr_company . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_contact_person)) ? '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_PERSON . $manufacturers_gpsr_contact_person . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_street)) ? '<li>' . TEXT_MANUFACTURER_GPSR_STREET . $manufacturers_gpsr_street . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_city)) ? '<li>' . TEXT_MANUFACTURER_GPSR_POSTCODE . $manufacturers_gpsr_postcode . ' ' . TEXT_MANUFACTURER_GPSR_CITY . $manufacturers_gpsr_city . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_country)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COUNTRY . $manufacturers_gpsr_country . '</li>' : '') . "\n"; ?>
-  <?php echo '<li>&nbsp; </li>'; ?>
-  <?php echo '<li>' . TEXT_MANUFACTURER_GPSR_URL_INFO . '</li>'; ?>
-  <?php echo ((!empty($manufacturers_gpsr_url)) ? '<li>' . TEXT_MANUFACTURER_GPSR_URL . $manufacturers_gpsr_url . '</li>' : '') . "\n"; ?>
-  <?php if (!empty($manufacturers_gpsr_company_noneu)) { ?>
-  <?php echo '<li>&nbsp; </li>'; ?>
-  <?php echo '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_INFO_NONEU . '</li>'; ?>
-  <?php echo '<li>&nbsp; </li>'; ?>
-  <?php echo '<li>' . TEXT_MANUFACTURER_GPSR_ADDRESS_INFO . '</li>'; ?>
-  <?php echo ((!empty($manufacturers_gpsr_company_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COMPANY_NONEU . $manufacturers_gpsr_company_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_contact_person_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_PERSON_NONEU . $manufacturers_gpsr_contact_person_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_street_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_STREET_NONEU . $manufacturers_gpsr_street_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_city_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_POSTCODE_NONEU . $manufacturers_gpsr_postcode_noneu . ' ' . TEXT_MANUFACTURER_GPSR_CITY_NONEU . $manufacturers_gpsr_city_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_country_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COUNTRY_NONEU . $manufacturers_gpsr_country_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo '<li>&nbsp; </li>'; ?>
-  <?php echo '<li>' . TEXT_MANUFACTURER_GPSR_URL_INFO . '</li>'; ?>
-  <?php echo ((!empty($manufacturers_gpsr_url_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_URL_NONEU . $manufacturers_gpsr_url_noneu . '</li>' : '') . "\n"; ?>
-  <?php echo '<li>&nbsp; </li>'; ?>
-  <?php } ?>
-  <?php echo ((!empty($manufacturers_gpsr_additional_1)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_1 . $manufacturers_gpsr_additional_1 . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_additional_2)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_2 . $manufacturers_gpsr_additional_2 . '</li>' : '') . "\n"; ?>
-  <?php echo ((!empty($manufacturers_gpsr_additional_3)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_3 . $manufacturers_gpsr_additional_3 . '</li>' : '') . "\n"; ?>
-</ul>
-</div>
-<?php } ?>
-<?php } ?>
+    <?php
+    if ($flag_show_gpsr) { ?>
+        <?php
+        if (!empty($manufacturers_gpsr_company)) { ?>
+            <div id="gpsrinfo" class="productGeneral">
+                <ul id="gpsrDetailsList">
+                    <?= '<li><b>' . TEXT_MANUFACTURER_GPSR_INFO . '' . $manufacturers_name . '</b></li>' ?>
+                    <?= '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_INFO . '</li>' ?>
+                    <?= '<li>&nbsp; </li>' ?>
+                    <?= '<li>' . TEXT_MANUFACTURER_GPSR_ADDRESS_INFO . '</li>' ?>
+                    <?= ((!empty($manufacturers_gpsr_company)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COMPANY . $manufacturers_gpsr_company . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_contact_person)) ? '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_PERSON . $manufacturers_gpsr_contact_person . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_street)) ? '<li>' . TEXT_MANUFACTURER_GPSR_STREET . $manufacturers_gpsr_street . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_city)) ? '<li>' . TEXT_MANUFACTURER_GPSR_POSTCODE . $manufacturers_gpsr_postcode . ' ' . TEXT_MANUFACTURER_GPSR_CITY . $manufacturers_gpsr_city . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_country)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COUNTRY . $manufacturers_gpsr_country . '</li>' : '') . "\n" ?>
+                    <?= '<li>&nbsp; </li>' ?>
+                    <?= '<li>' . TEXT_MANUFACTURER_GPSR_URL_INFO . '</li>' ?>
+                    <?= ((!empty($manufacturers_gpsr_url)) ? '<li>' . TEXT_MANUFACTURER_GPSR_URL . $manufacturers_gpsr_url . '</li>' : '') . "\n" ?>
+                    <?php
+                    if (!empty($manufacturers_gpsr_company_noneu)) { ?>
+                        <?= '<li>&nbsp; </li>' ?>
+                        <?= '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_INFO_NONEU . '</li>' ?>
+                        <?= '<li>&nbsp; </li>' ?>
+                        <?= '<li>' . TEXT_MANUFACTURER_GPSR_ADDRESS_INFO . '</li>' ?>
+                        <?= ((!empty($manufacturers_gpsr_company_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COMPANY_NONEU . $manufacturers_gpsr_company_noneu . '</li>' : '') . "\n" ?>
+                        <?= ((!empty($manufacturers_gpsr_contact_person_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_CONTACT_PERSON_NONEU . $manufacturers_gpsr_contact_person_noneu . '</li>' : '') . "\n" ?>
+                        <?= ((!empty($manufacturers_gpsr_street_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_STREET_NONEU . $manufacturers_gpsr_street_noneu . '</li>' : '') . "\n" ?>
+                        <?= ((!empty($manufacturers_gpsr_city_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_POSTCODE_NONEU . $manufacturers_gpsr_postcode_noneu . ' ' . TEXT_MANUFACTURER_GPSR_CITY_NONEU . $manufacturers_gpsr_city_noneu . '</li>' : '') . "\n" ?>
+                        <?= ((!empty($manufacturers_gpsr_country_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_COUNTRY_NONEU . $manufacturers_gpsr_country_noneu . '</li>' : '') . "\n" ?>
+                        <?= '<li>&nbsp; </li>' ?>
+                        <?= '<li>' . TEXT_MANUFACTURER_GPSR_URL_INFO . '</li>' ?>
+                        <?= ((!empty($manufacturers_gpsr_url_noneu)) ? '<li>' . TEXT_MANUFACTURER_GPSR_URL_NONEU . $manufacturers_gpsr_url_noneu . '</li>' : '') . "\n" ?>
+                        <?= '<li>&nbsp; </li>' ?>
+                    <?php
+                    } ?>
+                    <?= ((!empty($manufacturers_gpsr_additional_1)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_1 . $manufacturers_gpsr_additional_1 . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_additional_2)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_2 . $manufacturers_gpsr_additional_2 . '</li>' : '') . "\n" ?>
+                    <?= ((!empty($manufacturers_gpsr_additional_3)) ? '<li>' . TEXT_MANUFACTURER_GPSR_ADDITIONAL_3 . $manufacturers_gpsr_additional_3 . '</li>' : '') . "\n" ?>
+                </ul>
+            </div>
+        <?php
+        } ?>
+    <?php
+    } ?>
 <!--eof GPSR -->
 <!--bof Prev/Next bottom position -->
 <?php
