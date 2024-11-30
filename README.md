@@ -7,13 +7,17 @@ This plugin
 - The details are displayed on the product info page
 
 ## Installation
+0) As ALWAYS, with EVERY modification you do, try this on your DEVELOPMENT server, NEVER your live site. EVER. Clear?
 1) Run the SQL in the Admin SQL Patch tool.
-2) Compare the /files folder with your site using an appropriate comparison tool.  
-Most files are new.  
-The only "overwrite" is an addition to the tpl_product_info.php that inserts the info.  
-An example of this file with a css file for the responsive_classic template is provided for comparison.
+2) Compare the /files folder with your site using a comparison tool (obviously) and look at the differences.
+Most files are new/do not overwrite core files.  
+The only merges necessary are
+- additions to the tpl_product_info.php that inserts the info. An example of this along with a css file for the responsive_classic template is provided for comparison/example.
+- additions to the admin manufacturers language file.
 
 This module used the 157-modul-gpsr as the starting point. The original readme has not been updated, nor the german language files.
+
+TODO: make it an encapulsated plugin in it's own repository. Otherwise it is in a working state now.
 
 ## 157-modul-gpsr
 
