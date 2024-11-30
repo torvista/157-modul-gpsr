@@ -224,7 +224,7 @@ if ($products_description != '') {
 <!--bof GPSR  -->
 <?php
     if (!empty($flag_show_gpsr)) {
-    include $template->get_template_dir('/tpl_modules_gpsr_product_info.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_modules_gpsr_product_info.php';
+        include DIR_WS_MODULES . zen_get_module_directory('gpsr_manufacturer_info.php');
     }
 ?>
 <!--eof GPSR -->
