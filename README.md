@@ -17,7 +17,7 @@ The only merges necessary are
 
 This module used the 157-modul-gpsr as the starting point. The original readme has not been updated, nor the german language files.
 
-TODO: make it an encapulsated plugin in it's own repository. Otherwise it is in a working state now.
+TODO: make it an encapsulated plugin in its own repository. Otherwise, it is in a working state now.
 
 ## 157-modul-gpsr
 
