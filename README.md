@@ -1,6 +1,10 @@
 # GPSR Manufacturer Contact details for product data - Zen Cart
 
-## WORK IN PROGRESS (doesn't work yet) as an encapsulated plugin.
+## Status
+This branch as an encapsulated plugin is now abandoned since a very different version is continued here:
+https://github.com/torvista/Zen_Cart-GPSR
+
+
 
 Compatible with Zen Cart 2.1.0 and tested with php 8.4.1.
 
